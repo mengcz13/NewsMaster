@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="category_url">http://assignment.crazz.cn/news/en/category</string>
+    <string name="news_query_url">http://assignment.crazz.cn/news/query?locale=en</string>
+</resources>

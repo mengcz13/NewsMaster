@@ -1,8 +1,7 @@
-package com.ihandy.n2013010952;
+package com.ihandy.a2013010952;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -12,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -23,22 +23,20 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.android.volley.toolbox.NetworkImageView;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -134,6 +132,7 @@ public class MainActivity extends AppCompatActivity
         private NewsAdapter mAdapter;
         private RecyclerView.LayoutManager mLayoutManager;
         private SwipeRefreshLayout mSwipeRefreshLayout;
+        private long lastNewsId;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
@@ -158,6 +157,12 @@ public class MainActivity extends AppCompatActivity
             mRecyclerView.setLayoutManager(mLayoutManager);
             mAdapter = new NewsAdapter(new JSONArray());
             mRecyclerView.setAdapter(mAdapter);
+            mRecyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener((LinearLayoutManager) mLayoutManager) {
+                @Override
+                public void onLoadMore(int currentPage) {
+                    loadMoreNews();
+                }
+            });
 
             refreshNews();
 
@@ -171,7 +176,8 @@ public class MainActivity extends AppCompatActivity
                 public void onResponse(JSONObject response) {
                     try {
                         JSONArray newsArray = response.getJSONObject("data").getJSONArray("news");
-                        mAdapter.setNewsArray(newsArray);
+                        mAdapter.setNewsList(newsArray);
+                        lastNewsId = newsArray.getJSONObject(newsArray.length() - 1).getLong("news_id");
                     }
                     catch (org.json.JSONException e) {}
                 }
@@ -184,21 +190,94 @@ public class MainActivity extends AppCompatActivity
             RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().add(jsObjRequest);
         }
 
+        private void loadMoreNews() {
+            String url = getResources().getString(R.string.news_query_url) + "&category=" + ctgy.toString().replaceAll("\\s*", "") + "&max_news_id=" + lastNewsId;
+            JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    try {
+                        JSONArray newsArray = response.getJSONObject("data").getJSONArray("news");
+                        if (newsArray.length() > 1) {
+                            List<JSONObject> list = new ArrayList<>();
+                            for (int i = 1; i < newsArray.length(); ++i)
+                                list.add(newsArray.getJSONObject(i));
+                            newsArray = new JSONArray(list);
+                            mAdapter.addNewsList(newsArray);
+                            lastNewsId = newsArray.getJSONObject(newsArray.length() - 1).getLong("news_id");
+                        }
+                        else {
+                            Snackbar.make(mSwipeRefreshLayout, "No more new messages.", Snackbar.LENGTH_SHORT).show();
+                        }
+                    }
+                    catch (org.json.JSONException e) {}
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+
+                }
+            });
+            RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().add(jsObjRequest);
+        }
+
+        public abstract class EndlessRecyclerOnScrollListener extends
+                RecyclerView.OnScrollListener {
+
+            private int previousTotal = 0;
+            private boolean loading = true;
+            int firstVisibleItem, visibleItemCount, totalItemCount;
+
+            private int currentPage = 1;
+
+            private LinearLayoutManager mLinearLayoutManager;
+
+            public EndlessRecyclerOnScrollListener(
+                    LinearLayoutManager linearLayoutManager) {
+                this.mLinearLayoutManager = linearLayoutManager;
+            }
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                visibleItemCount = recyclerView.getChildCount();
+                totalItemCount = mLinearLayoutManager.getItemCount();
+                firstVisibleItem = mLinearLayoutManager.findFirstVisibleItemPosition();
+
+                if (loading) {
+                    if (totalItemCount > previousTotal) {
+                        loading = false;
+                        previousTotal = totalItemCount;
+                    }
+                }
+                if (!loading
+                        && (totalItemCount - visibleItemCount) <= firstVisibleItem) {
+                    currentPage++;
+                    onLoadMore(currentPage);
+                    loading = true;
+                }
+            }
+
+            public abstract void onLoadMore(int currentPage);
+        }
+
         public static class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
-            private JSONArray newsArray;
+            private List<JSONObject> newsList = new ArrayList<>();
 
             public static class ViewHolder extends RecyclerView.ViewHolder {
                 public TextView titleTextView;
                 public TextView sourceNameTextView;
+                public NetworkImageView networkImageView;
                 public ViewHolder(View rootview) {
                     super(rootview);
                     titleTextView = (TextView) rootview.findViewById(R.id.title_textview);
                     sourceNameTextView = (TextView) rootview.findViewById(R.id.source_textview);
+                    networkImageView = (NetworkImageView) rootview.findViewById(R.id.networkImageView);
                 }
             }
 
             public NewsAdapter(JSONArray jsonArray) {
-                setNewsArray(jsonArray);
+                setNewsList(jsonArray);
             }
 
             @Override
@@ -212,23 +291,37 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onBindViewHolder(ViewHolder holder, int position) {
                 try {
-                    JSONObject news = newsArray.getJSONObject(position);
+                    JSONObject news = newsList.get(position);
                     String title = news.getString("title");
                     String source = news.getJSONObject("source").getString("name");
+                    String imgurl = news.getJSONArray("imgs").getJSONObject(0).getString("url");
                     holder.titleTextView.setText(title);
                     holder.sourceNameTextView.setText(source);
+                    ImageLoader mImageLoader = RequestSingleton.getInstance(MyApplication.getAppContext()).getmImageLoader();
+                    holder.networkImageView.setImageUrl(imgurl, mImageLoader);
                 }
                 catch (org.json.JSONException e) {}
             }
 
             @Override
             public int getItemCount() {
-                return newsArray.length();
+                return newsList.size();
             }
 
-            public void setNewsArray(JSONArray jsonArray) {
-                newsArray = jsonArray;
+            public void addNewsList(JSONArray jsonArray) {
+                int len = jsonArray.length();
+                for (int i = 0; i < len; ++i) {
+                    try {
+                        newsList.add(jsonArray.getJSONObject(i));
+                    }
+                    catch (org.json.JSONException e) {}
+                }
                 notifyDataSetChanged();
+            }
+
+            public void setNewsList(JSONArray jsonArray) {
+                newsList.clear();
+                addNewsList(jsonArray);
             }
         }
     }

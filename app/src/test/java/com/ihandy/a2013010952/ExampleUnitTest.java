@@ -1,4 +1,4 @@
-package com.ihandy.n2013010952;
+package com.ihandy.a2013010952;
 
 import org.junit.Test;
 

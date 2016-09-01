@@ -9,7 +9,7 @@
     android:paddingRight="@dimen/zero_margin"
     android:paddingTop="@dimen/zero_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.ihandy.n2013010952.MainActivity"
+    tools:context="com.ihandy.a2013010952.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
     <!--<TextView-->

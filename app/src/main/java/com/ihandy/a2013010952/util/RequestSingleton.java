@@ -1,4 +1,4 @@
-package com.ihandy.a2013010952;
+package com.ihandy.a2013010952.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;

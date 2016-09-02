@@ -1,12 +1,8 @@
 package com.ihandy.a2013010952.activities;
 
-import android.content.Context;
-import android.content.Intent;
+
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,23 +12,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.ihandy.a2013010952.R;
-import com.ihandy.a2013010952.fragment.RefreshableNewsFragment;
-import com.ihandy.a2013010952.itemlistener.ItemOnClickListener;
-import com.ihandy.a2013010952.util.MyApplication;
-import com.ihandy.a2013010952.util.RequestSingleton;
+import com.ihandy.a2013010952.adapter.NewsFragmentStatePagerAdapter;
 
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -47,7 +30,7 @@ public class MainActivity extends AppCompatActivity
         getSupportActionBar().setTitle(getResources().getText(R.string.app_name));
 
         NewsFragmentStatePagerAdapter newsFragmentStatePagerAdapter = new NewsFragmentStatePagerAdapter(
-                getSupportFragmentManager()
+                getSupportFragmentManager(), this
         );
         ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(newsFragmentStatePagerAdapter);
@@ -116,82 +99,6 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-
-    public class NewsFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
-
-        public NewsFragmentStatePagerAdapter(FragmentManager fm) {
-            super(fm);
-            refreshCategory();
-        }
-
-        @Override
-        public Fragment getItem(int i) {
-            Fragment fragment = new RefreshableNewsFragment();
-            RefreshableNewsFragment re = (RefreshableNewsFragment)fragment;
-            re.setContext(MainActivity.this);
-            Bundle args = new Bundle();
-            CatTitlePair pair = catTitlePairs.get(i);
-            args.putCharSequence(RefreshableNewsFragment.ARG_TITLE, pair.title);
-            args.putCharSequence(RefreshableNewsFragment.ARG_CTGY, pair.category);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        @Override
-        public int getCount() {
-            return catTitlePairs.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return catTitlePairs.get(position).title;
-        }
-
-        private class CatTitlePair {
-            public String category;
-            public String title;
-
-            public CatTitlePair(String category, String title) {
-                this.category = category;
-                this.title = title;
-            }
-        }
-
-        private List<CatTitlePair> catTitlePairs = new ArrayList<>();
-
-        private void setCatTitlePairs(List<CatTitlePair> list) {
-            catTitlePairs = list;
-            notifyDataSetChanged();
-        }
-
-        private void refreshCategory() {
-            String url = getResources().getString(R.string.category_url) + "?timestamp=" + System.currentTimeMillis();
-            JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    JSONObject cats;
-                    try {
-                        cats = response.getJSONObject("data").getJSONObject("categories");
-                        List<CatTitlePair> pairs = new ArrayList<>();
-                        for (Iterator<String> it = cats.keys(); it.hasNext(); ) {
-                            String key = it.next();
-                            pairs.add(new CatTitlePair(key, cats.getString(key)));
-                        }
-                        setCatTitlePairs(pairs);
-                    } catch (org.json.JSONException e) {
-
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-
-                }
-            });
-            RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().add(jsObjRequest);
-        }
     }
 
 }

@@ -108,6 +108,13 @@ public class HttpHeaderParser {
             finalExpire = softExpire;
         }
 
+        // force to cache locally Mengcz, 20160902
+
+        // My modification begin!
+        softExpire = now;  // cache is reserved in 300 days!!!
+        finalExpire = softExpire + 25920000;
+        // My modification end!
+
         Cache.Entry entry = new Cache.Entry();
         entry.data = response.data;
         entry.etag = serverEtag;
@@ -136,7 +143,7 @@ public class HttpHeaderParser {
     /**
      * Retrieve a charset from headers
      *
-     * @param headers An {@link java.util.Map} of headers
+     * @param headers        An {@link java.util.Map} of headers
      * @param defaultCharset Charset to return if none can be found
      * @return Returns the charset specified in the Content-Type of this header,
      * or the defaultCharset if none can be found.

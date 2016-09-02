@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -69,25 +70,37 @@ abstract public class NewsFragment extends Fragment {
             this.mLinearLayoutManager = linearLayoutManager;
         }
 
+//        @Override
+//        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+//            super.onScrolled(recyclerView, dx, dy);
+//
+//            visibleItemCount = recyclerView.getChildCount();
+//            totalItemCount = mLinearLayoutManager.getItemCount();
+//            firstVisibleItem = mLinearLayoutManager.findFirstVisibleItemPosition();
+//
+//            if (loading) {
+//                if (totalItemCount > previousTotal) {
+//                    loading = false;
+//                    previousTotal = totalItemCount;
+//                }
+//            }
+//            if (!loading
+//                    && (totalItemCount - visibleItemCount) <= firstVisibleItem) {
+//                currentPage++;
+//                onLoadMore(currentPage);
+//                loading = true;
+//                Log.d("scroll", totalItemCount + " " + visibleItemCount + " " + firstVisibleItem);
+//            }
+//        }
+
         @Override
-        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-            super.onScrolled(recyclerView, dx, dy);
-
-            visibleItemCount = recyclerView.getChildCount();
-            totalItemCount = mLinearLayoutManager.getItemCount();
-            firstVisibleItem = mLinearLayoutManager.findFirstVisibleItemPosition();
-
-            if (loading) {
-                if (totalItemCount > previousTotal) {
-                    loading = false;
-                    previousTotal = totalItemCount;
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            super.onScrollStateChanged(recyclerView, newState);
+            if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                int lastVisiblePosition = mLinearLayoutManager.findLastVisibleItemPosition();
+                if (lastVisiblePosition >= recyclerView.getAdapter().getItemCount() - 1) {
+                    onLoadMore(currentPage);
                 }
-            }
-            if (!loading
-                    && (totalItemCount - visibleItemCount) <= firstVisibleItem) {
-                currentPage++;
-                onLoadMore(currentPage);
-                loading = true;
             }
         }
 

@@ -39,6 +39,8 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
             titleTextView = (TextView) rootView.findViewById(R.id.title_textview);
             sourceNameTextView = (TextView) rootView.findViewById(R.id.source_textview);
             networkImageView = (NetworkImageView) rootView.findViewById(R.id.networkImageView);
+            networkImageView.setDefaultImageResId(R.drawable.loading);
+            networkImageView.setErrorImageResId(R.drawable.no_image_available);
         }
     }
 

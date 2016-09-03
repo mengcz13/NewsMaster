@@ -48,8 +48,10 @@ public class LikedColumnsSingleton {
         List<CatTitlePair> neededList = new ArrayList<>();
         List<CatTitlePair> allList = getAllColumns();
         Map<String, Integer> statusMap = new HashMap<>();
-        for (CatTitlePair pair : allList) {
-            statusMap.put(pair.category, pair.status);
+        if (allList != null) {
+            for (CatTitlePair pair : allList) {
+                statusMap.put(pair.category, pair.status);
+            }
         }
 
         for (CatTitlePair pair : columnList) {

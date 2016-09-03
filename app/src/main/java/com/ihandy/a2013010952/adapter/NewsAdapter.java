@@ -48,7 +48,7 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
             JSONObject jsSource = news.getJSONObject("source");
             String source = jsSource.getString("name");
             final String newsUrl = jsSource.getString("url");
-            holder.rootView.setOnClickListener(new ItemOnClickListener(context, newsUrl));
+            holder.rootView.setOnClickListener(new ItemOnClickListener(context, newsUrl, news));
             String imgurl = news.getJSONArray("imgs").getJSONObject(0).getString("url");
             holder.titleTextView.setText(title);
             holder.sourceNameTextView.setText(source);

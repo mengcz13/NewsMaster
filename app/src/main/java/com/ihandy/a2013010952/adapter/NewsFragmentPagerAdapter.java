@@ -38,7 +38,6 @@ public class NewsFragmentPagerAdapter extends FragmentPagerAdapter {
         refreshCategory();
     }
 
-    @Override
     public Fragment getItem(int i) {
         Fragment fragment = new RefreshableNewsFragment();
         RefreshableNewsFragment re = (RefreshableNewsFragment) fragment;

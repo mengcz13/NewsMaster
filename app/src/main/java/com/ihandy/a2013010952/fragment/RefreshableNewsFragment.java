@@ -49,38 +49,6 @@ public class RefreshableNewsFragment extends NewsFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
-        View rootView = inflater.inflate(
-                R.layout.single_column_main, container, false);
-
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.layout_swipe_refresh);
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refreshNews();
-                mSwipeRefreshLayout.setRefreshing(false);
-            }
-        });
-
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
-        mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new NewsAdapter(context, new JSONArray());
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.addOnScrollListener(new EndlessRecyclerOnScrollListener((LinearLayoutManager) mLayoutManager) {
-            @Override
-            public void onLoadMore(int currentPage) {
-                loadMoreNews();
-            }
-        });
-
-        refreshNews();
-
-        return rootView;
-    }
-
-    @Override
     public void refreshNews() {
         final String url = MyApplication.getAppContext().getResources().getString(R.string.news_query_url) + "&category=" + ctgy.toString().replaceAll("\\s*", "");
         Log.d("url", url);

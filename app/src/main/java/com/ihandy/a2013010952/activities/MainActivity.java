@@ -16,11 +16,13 @@ import android.view.MenuItem;
 
 import com.ihandy.a2013010952.R;
 import com.ihandy.a2013010952.adapter.NewsFragmentPagerAdapter;
+import com.ihandy.a2013010952.database.model.FavoriteNews;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    public static boolean categoryChanged = false;
     private ViewPager mViewPager;
     private NewsFragmentPagerAdapter newsFragmentStatePagerAdapter;
     private TabLayout tabLayout;
@@ -57,11 +59,14 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
-        newsFragmentStatePagerAdapter = new NewsFragmentPagerAdapter(
-                getSupportFragmentManager(), this
-        );
-        mViewPager.setAdapter(newsFragmentStatePagerAdapter);
-        tabLayout.setupWithViewPager(mViewPager);
+        if (categoryChanged) {
+            newsFragmentStatePagerAdapter = new NewsFragmentPagerAdapter(
+                    getSupportFragmentManager(), this
+            );
+            mViewPager.setAdapter(newsFragmentStatePagerAdapter);
+            tabLayout.setupWithViewPager(mViewPager);
+            categoryChanged = false;
+        }
     }
 
     @Override
@@ -104,12 +109,13 @@ public class MainActivity extends AppCompatActivity
 
         switch (id) {
             case R.id.nav_favorites:
+                this.startActivity(new Intent(this, FavoritesActivity.class));
                 break;
             case R.id.nav_ctgmng:
-                Intent ctgmngIntent = new Intent(this, CategoryManageActivity.class);
-                this.startActivity(ctgmngIntent);
+                this.startActivity(new Intent(this, CategoryManageActivity.class));
                 break;
             case R.id.nav_aboutme:
+                this.startActivity(new Intent(this, AboutMeActivity.class));
                 break;
         }
 

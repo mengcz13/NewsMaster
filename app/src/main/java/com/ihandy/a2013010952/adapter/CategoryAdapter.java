@@ -9,6 +9,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.ihandy.a2013010952.R;
+import com.ihandy.a2013010952.activities.MainActivity;
 import com.ihandy.a2013010952.adapter.NewsFragmentPagerAdapter.CatTitlePair;
 import com.ihandy.a2013010952.util.LikedColumnsSingleton;
 import com.ihandy.a2013010952.util.MyApplication;
@@ -61,7 +62,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
             final CatTitlePair pair = likeList.get(pos);
             holder.categoryNameView.setText(pair.title);
             holder.imageButton.setVisibility(View.VISIBLE);
-            holder.imageButton.setImageResource(R.drawable.ic_arrow_downward_black_24dp);
+            holder.imageButton.setImageResource(R.drawable.ic_arrow_downward_24dp);
             holder.imageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -80,7 +81,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
             final CatTitlePair pair = dislikeList.get(pos);
             holder.categoryNameView.setText(pair.title);
             holder.imageButton.setVisibility(View.VISIBLE);
-            holder.imageButton.setImageResource(R.drawable.ic_arrow_upward_black_24dp);
+            holder.imageButton.setImageResource(R.drawable.ic_arrow_upward_24dp);
             holder.imageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -107,6 +108,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
             list.add(entry.getValue());
         }
         LikedColumnsSingleton.getInstance(MyApplication.getAppContext()).setNewColumns(list);
+        MainActivity.categoryChanged = true;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

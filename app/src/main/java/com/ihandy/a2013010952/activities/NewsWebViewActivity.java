@@ -1,6 +1,7 @@
 package com.ihandy.a2013010952.activities;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -12,9 +13,14 @@ import android.view.Window;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ImageButton;
 
 import com.ihandy.a2013010952.R;
+import com.ihandy.a2013010952.database.model.FavoriteNews;
 import com.ihandy.a2013010952.itemlistener.ItemOnClickListener;
+
+import org.json.JSONObject;
+import org.litepal.crud.DataSupport;
 
 public class NewsWebViewActivity extends AppCompatActivity {
     private ShareActionProvider mShareActionProvider;
@@ -22,6 +28,12 @@ public class NewsWebViewActivity extends AppCompatActivity {
     private String newsTitle;
     private Intent sendIntent;
     private WebView newsWebView;
+    private MenuItem favoriteItem;
+    private boolean addedToFavorite = false;
+    private FavoriteNews favoriteNews;
+    private String newsJsonStr;
+    private JSONObject newsJson;
+    private long newsId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +73,13 @@ public class NewsWebViewActivity extends AppCompatActivity {
             }
 
         });
+
+        newsJsonStr = intent.getStringExtra(ItemOnClickListener.NEWSJSON);
+        try {
+            newsJson = new JSONObject(newsJsonStr);
+            newsId = newsJson.getLong("news_id");
+        } catch (org.json.JSONException e) {
+        }
     }
 
     @Override
@@ -69,6 +88,20 @@ public class NewsWebViewActivity extends AppCompatActivity {
             case android.R.id.home:
                 this.finish();
                 return true;
+            case R.id.modify_favorite:
+                if (!addedToFavorite) {
+                    if (favoriteNews == null) {
+                        favoriteNews = new FavoriteNews();
+                    }
+                    favoriteNews.setNewsId(newsId);
+                    favoriteNews.setJsonData(newsJsonStr);
+                    favoriteNews.setCollectTime(System.currentTimeMillis());
+                    favoriteItem.setEnabled(false);
+                    new AddNewsToFavoriteTask().execute(favoriteNews);
+                } else {
+                    favoriteItem.setEnabled(false);
+                    new DeleteNewsFromFavoriteTask().execute(favoriteNews);
+                }
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -91,6 +124,10 @@ public class NewsWebViewActivity extends AppCompatActivity {
         // Locate MenuItem with ShareActionProvider
         MenuItem item = menu.findItem(R.id.menu_item_share);
 
+        favoriteItem = menu.findItem(R.id.modify_favorite);
+        favoriteItem.setVisible(false);
+        new QuerySingleNewsFavoriteTask().execute(newsId);
+
         // Fetch and store ShareActionProvider
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
 
@@ -104,6 +141,62 @@ public class NewsWebViewActivity extends AppCompatActivity {
     private void setShareIntent(Intent shareIntent) {
         if (mShareActionProvider != null) {
             mShareActionProvider.setShareIntent(shareIntent);
+        }
+    }
+
+    class QuerySingleNewsFavoriteTask extends AsyncTask<Long, Void, FavoriteNews> {
+        @Override
+        protected FavoriteNews doInBackground(Long... longs) {
+            String newsIdstr = Long.toString(longs[0]);
+            FavoriteNews res = DataSupport.where("newsid = ?", newsIdstr).findFirst(FavoriteNews.class);
+            return res;
+        }
+
+        @Override
+        protected void onPostExecute(FavoriteNews news) {
+            favoriteNews = news;
+            if (favoriteNews == null) {
+                addedToFavorite = false;
+                favoriteItem.setIcon(R.drawable.ic_favorite_border_white_24dp);
+            } else {
+                addedToFavorite = true;
+                favoriteItem.setIcon(R.drawable.ic_favorite_red_24dp);
+            }
+            favoriteItem.setVisible(true);
+        }
+    }
+
+    class AddNewsToFavoriteTask extends AsyncTask<FavoriteNews, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(FavoriteNews... favoriteNewses) {
+            return favoriteNewses[0].save();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            if (success) {
+                addedToFavorite = true;
+                favoriteItem.setIcon(R.drawable.ic_favorite_red_24dp);
+            } else {
+                addedToFavorite = false;
+                favoriteItem.setIcon(R.drawable.ic_favorite_border_white_24dp);
+            }
+            favoriteItem.setEnabled(true);
+        }
+    }
+
+    class DeleteNewsFromFavoriteTask extends AsyncTask<FavoriteNews, Void, Void> {
+        @Override
+        protected Void doInBackground(FavoriteNews... favoriteNewses) {
+            favoriteNewses[0].delete();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void v) {
+            addedToFavorite = false;
+            favoriteItem.setIcon(R.drawable.ic_favorite_border_white_24dp);
+            favoriteItem.setEnabled(true);
         }
     }
 }

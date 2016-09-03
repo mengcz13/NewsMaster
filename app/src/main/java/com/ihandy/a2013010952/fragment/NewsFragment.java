@@ -32,6 +32,15 @@ abstract public class NewsFragment extends Fragment {
         View rootView = inflater.inflate(
                 R.layout.single_column_main, container, false);
 
+        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.layout_swipe_refresh);
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                refreshNews();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getActivity());

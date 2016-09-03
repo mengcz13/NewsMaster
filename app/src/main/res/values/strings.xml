@@ -9,4 +9,8 @@
 
     <string name="liked_columns_preference_key">com.ihandy.a2013010952.LIKEDCOLUMNSPREFERENCEKEY</string>
     <string name="liked_object_type">JSON</string>
+
+    <string name="favorites">Favorites</string>
+    <string name="category_management">Category Management</string>
+    <string name="aboutme">About Me</string>
 </resources>

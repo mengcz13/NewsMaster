@@ -1,6 +1,7 @@
 package com.ihandy.a2013010952.activities;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -14,11 +15,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.ihandy.a2013010952.R;
-import com.ihandy.a2013010952.adapter.NewsFragmentStatePagerAdapter;
+import com.ihandy.a2013010952.adapter.NewsFragmentPagerAdapter;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private ViewPager mViewPager;
+    private NewsFragmentPagerAdapter newsFragmentStatePagerAdapter;
+    private TabLayout tabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,12 +34,12 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(getResources().getText(R.string.app_name));
 
-        NewsFragmentStatePagerAdapter newsFragmentStatePagerAdapter = new NewsFragmentStatePagerAdapter(
+        newsFragmentStatePagerAdapter = new NewsFragmentPagerAdapter(
                 getSupportFragmentManager(), this
         );
-        ViewPager mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(newsFragmentStatePagerAdapter);
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tab);
+        tabLayout = (TabLayout) findViewById(R.id.tab);
         tabLayout.setupWithViewPager(mViewPager);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -47,6 +52,16 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        newsFragmentStatePagerAdapter = new NewsFragmentPagerAdapter(
+                getSupportFragmentManager(), this
+        );
+        mViewPager.setAdapter(newsFragmentStatePagerAdapter);
+        tabLayout.setupWithViewPager(mViewPager);
     }
 
     @Override
@@ -91,6 +106,8 @@ public class MainActivity extends AppCompatActivity
             case R.id.nav_favorites:
                 break;
             case R.id.nav_ctgmng:
+                Intent ctgmngIntent = new Intent(this, CategoryManageActivity.class);
+                this.startActivity(ctgmngIntent);
                 break;
             case R.id.nav_aboutme:
                 break;

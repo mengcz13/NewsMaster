@@ -50,17 +50,20 @@ abstract public class NewsFragment extends Fragment {
         return rootView;
     }
 
-    abstract protected void refreshNews();
+    abstract public void refreshNews();
 
-    abstract protected void loadMoreNews();
+    abstract public void loadMoreNews();
+
+    public void setContext(Context context) {
+        this.context = context;
+    }
 
     public abstract class EndlessRecyclerOnScrollListener extends
             RecyclerView.OnScrollListener {
 
+        int firstVisibleItem, visibleItemCount, totalItemCount;
         private int previousTotal = 0;
         private boolean loading = true;
-        int firstVisibleItem, visibleItemCount, totalItemCount;
-
         private int currentPage = 1;
 
         private LinearLayoutManager mLinearLayoutManager;
@@ -105,10 +108,6 @@ abstract public class NewsFragment extends Fragment {
         }
 
         public abstract void onLoadMore(int currentPage);
-    }
-
-    public void setContext(Context context) {
-        this.context = context;
     }
 
 }

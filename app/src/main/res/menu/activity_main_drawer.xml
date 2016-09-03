@@ -36,16 +36,16 @@
     <item
         android:id="@+id/nav_favorites"
         android:icon="@drawable/ic_menu_camera"
-        android:title="Favorites" />
+        android:title="@string/favorites" />
 
     <item
         android:id="@+id/nav_ctgmng"
         android:icon="@drawable/ic_menu_manage"
-        android:title="Category Management" />
+        android:title="@string/category_management" />
 
     <item
         android:id="@+id/nav_aboutme"
         android:icon="@drawable/ic_menu_camera"
-        android:title="About Me" />
+        android:title="@string/aboutme" />
 
 </menu>

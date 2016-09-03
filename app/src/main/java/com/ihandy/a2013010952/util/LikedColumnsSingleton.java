@@ -6,19 +6,21 @@ import android.content.SharedPreferences;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.ihandy.a2013010952.R;
-import com.ihandy.a2013010952.adapter.NewsFragmentStatePagerAdapter.CatTitlePair;
+import com.ihandy.a2013010952.adapter.NewsFragmentPagerAdapter.CatTitlePair;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Mengcz on 2016/9/2.
  */
 public class LikedColumnsSingleton {
-    private static LikedColumnsSingleton instance;
-    private static Context context;
     private final static String JSON = MyApplication.getAppContext().getString(R.string.liked_object_type);
     private final static Gson GSON = new Gson();
+    private static LikedColumnsSingleton instance;
+    private static Context context;
     private SharedPreferences likedColumnSharedPref;
 
     private LikedColumnsSingleton(Context context) {
@@ -40,19 +42,21 @@ public class LikedColumnsSingleton {
         return likedColumnSharedPref;
     }
 
-    public int getLikeStatus(String column) {
-        return likedColumnSharedPref.getInt(column, CatTitlePair.NOT_EXIST);
-    }
-
     // When you get list from the server, refresh local data, return likes
     public List<CatTitlePair> mergeNewColumns(List<CatTitlePair> columnList) {
         SharedPreferences.Editor leditor = getLikedColumnSharedPref().edit();
         List<CatTitlePair> neededList = new ArrayList<>();
+        List<CatTitlePair> allList = getAllColumns();
+        Map<String, Integer> statusMap = new HashMap<>();
+        for (CatTitlePair pair : allList) {
+            statusMap.put(pair.category, pair.status);
+        }
 
         for (CatTitlePair pair : columnList) {
-            pair.status = getLikeStatus(pair.category);
-            if (pair.status == CatTitlePair.NOT_EXIST)
-                pair.status = CatTitlePair.LIKE;
+            Integer status = statusMap.get(pair.category);
+            if (status == null)
+                status = CatTitlePair.LIKE;
+            pair.status = status;
             if (pair.status == CatTitlePair.LIKE)
                 neededList.add(pair);
         }
@@ -62,6 +66,21 @@ public class LikedColumnsSingleton {
         leditor.apply();
 
         return neededList;
+    }
+
+    public void setNewColumns(List<CatTitlePair> newColumns) {
+        SharedPreferences.Editor leditor = getLikedColumnSharedPref().edit();
+        List<CatTitlePair> neededList = new ArrayList<>();
+        leditor.clear();
+        leditor.putString(JSON, GSON.toJson(newColumns));
+        leditor.apply();
+    }
+
+    public List<CatTitlePair> getAllColumns() {
+        String jsonstr = getLikedColumnSharedPref().getString(JSON, "");
+        List<CatTitlePair> columns = GSON.fromJson(jsonstr, new TypeToken<List<CatTitlePair>>() {
+        }.getType());
+        return columns;
     }
 
     public List<CatTitlePair> getLikedColumns() {

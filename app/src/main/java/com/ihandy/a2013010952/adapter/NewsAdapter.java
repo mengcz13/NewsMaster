@@ -27,23 +27,6 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
     private List<JSONObject> newsList = new ArrayList<>();
     private Context context;
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView titleTextView;
-        public TextView sourceNameTextView;
-        public NetworkImageView networkImageView;
-        public View rootView;
-
-        public ViewHolder(View rootView) {
-            super(rootView);
-            this.rootView = rootView;
-            titleTextView = (TextView) rootView.findViewById(R.id.title_textview);
-            sourceNameTextView = (TextView) rootView.findViewById(R.id.source_textview);
-            networkImageView = (NetworkImageView) rootView.findViewById(R.id.networkImageView);
-            networkImageView.setDefaultImageResId(R.drawable.loading);
-            networkImageView.setErrorImageResId(R.drawable.no_image_available);
-        }
-    }
-
     public NewsAdapter(Context context, JSONArray jsonArray) {
         this.context = context;
         setNewsList(jsonArray);
@@ -89,11 +72,30 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
             }
         }
         notifyDataSetChanged();
+        notifyItemRangeChanged(0, getItemCount());
     }
 
     public void setNewsList(JSONArray jsonArray) {
         newsList.clear();
+        notifyDataSetChanged();
+        notifyItemRangeRemoved(0, getItemCount());
         addNewsList(jsonArray);
     }
 
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        public TextView titleTextView;
+        public TextView sourceNameTextView;
+        public NetworkImageView networkImageView;
+        public View rootView;
+
+        public ViewHolder(View rootView) {
+            super(rootView);
+            this.rootView = rootView;
+            titleTextView = (TextView) rootView.findViewById(R.id.title_textview);
+            sourceNameTextView = (TextView) rootView.findViewById(R.id.source_textview);
+            networkImageView = (NetworkImageView) rootView.findViewById(R.id.networkImageView);
+            networkImageView.setDefaultImageResId(R.drawable.loading);
+            networkImageView.setErrorImageResId(R.drawable.no_image_available);
+        }
+    }
 }

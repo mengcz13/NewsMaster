@@ -40,13 +40,18 @@ public class RefreshableNewsFragment extends NewsFragment {
     private CharSequence ctgy;
     private long lastNewsId;
 
+    public void setTitle(CharSequence title) {
+        this.title = title;
+    }
+
+    public void setCtgy(CharSequence ctgy) {
+        this.ctgy = ctgy;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstance) {
         View rootView = inflater.inflate(
                 R.layout.single_column_main, container, false);
-        Bundle args = getArguments();
-        title = args.getCharSequence(ARG_TITLE);
-        ctgy = args.getCharSequence(ARG_CTGY);
 
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.layout_swipe_refresh);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -75,21 +80,9 @@ public class RefreshableNewsFragment extends NewsFragment {
         return rootView;
     }
 
-    private class RefreshResponseListener implements Response.Listener<JSONObject> {
-        @Override
-        public void onResponse(JSONObject response) {
-            try {
-                JSONArray newsArray = response.getJSONObject("data").getJSONArray("news");
-                mAdapter.setNewsList(newsArray);
-                lastNewsId = newsArray.getJSONObject(newsArray.length() - 1).getLong("news_id");
-            } catch (org.json.JSONException e) {
-            }
-        }
-    }
-
     @Override
-    protected void refreshNews() {
-        final String url = getResources().getString(R.string.news_query_url) + "&category=" + ctgy.toString().replaceAll("\\s*", "");
+    public void refreshNews() {
+        final String url = MyApplication.getAppContext().getResources().getString(R.string.news_query_url) + "&category=" + ctgy.toString().replaceAll("\\s*", "");
         Log.d("url", url);
         JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, refreshResponseListener, new Response.ErrorListener() {
             @Override
@@ -104,6 +97,37 @@ public class RefreshableNewsFragment extends NewsFragment {
         });
         jsObjRequest.setShouldCache(true);
         RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().add(jsObjRequest);
+    }
+
+    @Override
+    public void loadMoreNews() {
+        final String url = MyApplication.getAppContext().getResources().getString(R.string.news_query_url) + "&category=" + ctgy.toString().replaceAll("\\s*", "") + "&max_news_id=" + lastNewsId;
+        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, loadMoreResponseListener, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+//                String jsonstr = (new String(RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().getCache().get(url).data));
+//                try {
+//                    JSONObject cachedjson = new JSONObject(jsonstr);
+//                    loadMoreResponseListener.onResponse(cachedjson);
+//                } catch (org.json.JSONException e) {
+//                }
+            }
+        });
+        jsObjRequest.setShouldCache(true);
+        RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().add(jsObjRequest);
+    }
+
+    private class RefreshResponseListener implements Response.Listener<JSONObject> {
+        @Override
+        public void onResponse(JSONObject response) {
+            try {
+                JSONArray newsArray = response.getJSONObject("data").getJSONArray("news");
+                mAdapter.setNewsList(newsArray);
+                lastNewsId = newsArray.getJSONObject(newsArray.length() - 1).getLong("news_id");
+            } catch (org.json.JSONException e) {
+                mAdapter.setNewsList(new JSONArray());
+            }
+        }
     }
 
     private class LoadMoreResponseListener implements Response.Listener<JSONObject> {
@@ -127,24 +151,6 @@ public class RefreshableNewsFragment extends NewsFragment {
             } catch (org.json.JSONException e) {
             }
         }
-    }
-
-    @Override
-    protected void loadMoreNews() {
-        final String url = getResources().getString(R.string.news_query_url) + "&category=" + ctgy.toString().replaceAll("\\s*", "") + "&max_news_id=" + lastNewsId;
-        JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, loadMoreResponseListener, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-//                String jsonstr = (new String(RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().getCache().get(url).data));
-//                try {
-//                    JSONObject cachedjson = new JSONObject(jsonstr);
-//                    loadMoreResponseListener.onResponse(cachedjson);
-//                } catch (org.json.JSONException e) {
-//                }
-            }
-        });
-        jsObjRequest.setShouldCache(true);
-        RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().add(jsObjRequest);
     }
 
 

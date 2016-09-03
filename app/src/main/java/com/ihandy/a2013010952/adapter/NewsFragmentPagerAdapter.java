@@ -4,7 +4,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.view.PagerAdapter;
+import android.view.ViewGroup;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -25,10 +28,11 @@ import java.util.List;
 /**
  * Created by Mengcz on 2016/9/2.
  */
-public class NewsFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
+public class NewsFragmentPagerAdapter extends FragmentPagerAdapter {
     private Context context;
+    private List<CatTitlePair> catTitlePairs = new ArrayList<>();
 
-    public NewsFragmentStatePagerAdapter(FragmentManager fm, Context context) {
+    public NewsFragmentPagerAdapter(FragmentManager fm, Context context) {
         super(fm);
         this.context = context;
         refreshCategory();
@@ -39,12 +43,23 @@ public class NewsFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
         Fragment fragment = new RefreshableNewsFragment();
         RefreshableNewsFragment re = (RefreshableNewsFragment) fragment;
         re.setContext(context);
-        Bundle args = new Bundle();
-        CatTitlePair pair = catTitlePairs.get(i);
-        args.putCharSequence(RefreshableNewsFragment.ARG_TITLE, pair.title);
-        args.putCharSequence(RefreshableNewsFragment.ARG_CTGY, pair.category);
-        fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public Object instantiateItem(ViewGroup container, int position) {
+        RefreshableNewsFragment fragment = (RefreshableNewsFragment) super.instantiateItem(container, position);
+        CatTitlePair pair = catTitlePairs.get(position);
+        fragment.setContext(context);
+        fragment.setTitle(pair.title);
+        fragment.setCtgy(pair.category);
+        fragment.refreshNews();
+        return fragment;
+    }
+
+    @Override
+    public int getItemPosition(Object object) {
+        return PagerAdapter.POSITION_NONE;
     }
 
     @Override
@@ -57,30 +72,12 @@ public class NewsFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
         return catTitlePairs.get(position).title;
     }
 
-    public static class CatTitlePair {
-        public String category;
-        public String title;
-        public int status;
-
-        final public static int LIKE = 1;
-        final public static int DISLIKE = 2;
-        final public static int NOT_EXIST = 0;
-
-        public CatTitlePair(String category, String title, int status) {
-            this.category = category;
-            this.title = title;
-            this.status = status;
-        }
-    }
-
-    private List<CatTitlePair> catTitlePairs = new ArrayList<>();
-
     private void setCatTitlePairs(List<CatTitlePair> list) {
         catTitlePairs = list;
         notifyDataSetChanged();
     }
 
-    private void refreshCategory() {
+    public void refreshCategory() {
         String url = MyApplication.getAppContext().getResources().getString(R.string.category_url) + "?timestamp=" + System.currentTimeMillis();
         JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
             @Override
@@ -106,5 +103,20 @@ public class NewsFragmentStatePagerAdapter extends FragmentStatePagerAdapter {
             }
         });
         RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().add(jsObjRequest);
+    }
+
+    public static class CatTitlePair {
+        final public static int LIKE = 1;
+        final public static int DISLIKE = 2;
+        final public static int NOT_EXIST = 0;
+        public String category;
+        public String title;
+        public int status;
+
+        public CatTitlePair(String category, String title, int status) {
+            this.category = category;
+            this.title = title;
+            this.status = status;
+        }
     }
 }

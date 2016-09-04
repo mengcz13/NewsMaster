@@ -1,7 +1,11 @@
 package com.ihandy.a2013010952.activities;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Path;
 import android.os.AsyncTask;
+import android.os.Environment;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,15 +22,26 @@ import android.widget.ImageButton;
 import com.ihandy.a2013010952.R;
 import com.ihandy.a2013010952.database.model.FavoriteNews;
 import com.ihandy.a2013010952.itemlistener.ItemOnClickListener;
+import com.ihandy.a2013010952.util.MyApplication;
+import com.ihandy.a2013010952.util.RequestSingleton;
 
 import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URL;
 
 import cn.sharesdk.framework.ShareSDK;
 import cn.sharesdk.onekeyshare.OnekeyShare;
 
 public class NewsWebViewActivity extends AppCompatActivity {
     private String newsUrl;
+    private String titleImgUrl;
+    private String titleImgPath;
     private String newsTitle;
     private WebView newsWebView;
     private MenuItem favoriteItem;
@@ -36,6 +51,7 @@ public class NewsWebViewActivity extends AppCompatActivity {
     private JSONObject newsJson;
     private long newsId;
     private MenuItem shareMenuItem;
+    private OnekeyShare oks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +82,6 @@ public class NewsWebViewActivity extends AppCompatActivity {
             @Override
             public void onReceivedTitle(WebView view, String title) {
                 getSupportActionBar().setTitle(title);
-                newsTitle = title;
-                shareMenuItem.setEnabled(true);
                 super.onReceivedTitle(view, title);
             }
 
@@ -77,8 +91,10 @@ public class NewsWebViewActivity extends AppCompatActivity {
         try {
             newsJson = new JSONObject(newsJsonStr);
             newsId = newsJson.getLong("news_id");
+            new PrepareForShareTask().execute(newsJson);
         } catch (org.json.JSONException e) {
         }
+
     }
 
     @Override
@@ -136,20 +152,67 @@ public class NewsWebViewActivity extends AppCompatActivity {
     }
 
     private void showShare() {
-        ShareSDK.initSDK(this);
-        OnekeyShare oks = new OnekeyShare();
-        oks.disableSSOWhenAuthorize();
-
         oks.setTitle(newsTitle);
         oks.setTitleUrl(newsUrl);
         oks.setText(String.format("I have read \"%s\" [%s] on News Master!", newsTitle, newsUrl));
-        //oks.setImageUrl("http://f1.sharesdk.cn/imgs/2014/02/26/owWpLZo_638x960.jpg");
+        if (titleImgPath != null)
+            oks.setImagePath(titleImgPath);
         oks.setUrl(newsUrl);
-        oks.setComment(String.format("I have read \"%s\" [%s] on News Master!", newsTitle, newsUrl));
-        oks.setSite(getString(R.string.app_name));
-        oks.setSiteUrl(newsUrl);
 
         oks.show(this);
+    }
+
+    class PrepareForShareTask extends AsyncTask<JSONObject, Void, Boolean> {
+        public static final String ALBUM = "shareTempImg";
+
+        @Override
+        protected Boolean doInBackground(JSONObject... jsonObjects) {
+            ShareSDK.initSDK(NewsWebViewActivity.this, "16ca960e7a1f5");
+            Boolean success;
+            oks = new OnekeyShare();
+            oks.disableSSOWhenAuthorize();
+            JSONObject newsJson = jsonObjects[0];
+            try {
+                newsTitle = newsJson.getString("title");
+                titleImgUrl = newsJson.getJSONArray("imgs").getJSONObject(0).getString("url");
+                File tempImg = new File(MyApplication.getAppContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), ALBUM);
+                tempImg.mkdirs();
+                tempImg = new File(tempImg, titleImgUrl.substring(titleImgUrl.lastIndexOf('/') + 1, titleImgUrl.length()));
+                BufferedInputStream in = null;
+                BufferedOutputStream out = null;
+                try {
+                    in = new BufferedInputStream(new URL(titleImgUrl).openStream());
+                    out = new BufferedOutputStream(new FileOutputStream(tempImg));
+                    byte[] bytes = new byte[1 << 20];
+                    int count = 0;
+                    while ((count = in.read(bytes, 0, 1 << 20)) != -1) {
+                        out.write(bytes, 0, count);
+                    }
+                    titleImgPath = tempImg.getAbsolutePath();
+                } catch (IOException e) {
+                    titleImgPath = null;
+                } finally {
+                    if (in != null)
+                        in.close();
+                    if (out != null)
+                        out.close();
+                }
+                success = true;
+            } catch (org.json.JSONException e) {
+                success = false;
+            } catch (IOException e) {
+                success = false;
+            }
+            return success;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean success) {
+            if (success)
+                shareMenuItem.setEnabled(true);
+            else
+                shareMenuItem.setEnabled(false);
+        }
     }
 
     class QuerySingleNewsFavoriteTask extends AsyncTask<Long, Void, FavoriteNews> {

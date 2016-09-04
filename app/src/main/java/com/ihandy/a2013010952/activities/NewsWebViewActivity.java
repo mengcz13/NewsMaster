@@ -22,11 +22,12 @@ import com.ihandy.a2013010952.itemlistener.ItemOnClickListener;
 import org.json.JSONObject;
 import org.litepal.crud.DataSupport;
 
+import cn.sharesdk.framework.ShareSDK;
+import cn.sharesdk.onekeyshare.OnekeyShare;
+
 public class NewsWebViewActivity extends AppCompatActivity {
-    private ShareActionProvider mShareActionProvider;
     private String newsUrl;
     private String newsTitle;
-    private Intent sendIntent;
     private WebView newsWebView;
     private MenuItem favoriteItem;
     private boolean addedToFavorite = false;
@@ -34,6 +35,7 @@ public class NewsWebViewActivity extends AppCompatActivity {
     private String newsJsonStr;
     private JSONObject newsJson;
     private long newsId;
+    private MenuItem shareMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,11 +67,8 @@ public class NewsWebViewActivity extends AppCompatActivity {
             public void onReceivedTitle(WebView view, String title) {
                 getSupportActionBar().setTitle(title);
                 newsTitle = title;
+                shareMenuItem.setEnabled(true);
                 super.onReceivedTitle(view, title);
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_TEXT, String.format("Please read \"%s\" [%s] on News Master!", newsTitle, newsUrl));
-                sendIntent.setType("text/plain");
-                setShareIntent(sendIntent);
             }
 
         });
@@ -87,6 +86,9 @@ public class NewsWebViewActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 this.finish();
+                return true;
+            case R.id.menu_item_share:
+                showShare();
                 return true;
             case R.id.modify_favorite:
                 if (!addedToFavorite) {
@@ -122,26 +124,32 @@ public class NewsWebViewActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.webview_menu, menu);
 
         // Locate MenuItem with ShareActionProvider
-        MenuItem item = menu.findItem(R.id.menu_item_share);
+        shareMenuItem = menu.findItem(R.id.menu_item_share);
+        shareMenuItem.setEnabled(false);
 
         favoriteItem = menu.findItem(R.id.modify_favorite);
         favoriteItem.setVisible(false);
         new QuerySingleNewsFavoriteTask().execute(newsId);
 
-        // Fetch and store ShareActionProvider
-        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
-
-        sendIntent = new Intent();
-
         // Return true to display menu
         return super.onCreateOptionsMenu(menu);
     }
 
-    // Call to update the share intent
-    private void setShareIntent(Intent shareIntent) {
-        if (mShareActionProvider != null) {
-            mShareActionProvider.setShareIntent(shareIntent);
-        }
+    private void showShare() {
+        ShareSDK.initSDK(this);
+        OnekeyShare oks = new OnekeyShare();
+        oks.disableSSOWhenAuthorize();
+
+        oks.setTitle(newsTitle);
+        oks.setTitleUrl(newsUrl);
+        oks.setText(String.format("I have read \"%s\" [%s] on News Master!", newsTitle, newsUrl));
+        //oks.setImageUrl("http://f1.sharesdk.cn/imgs/2014/02/26/owWpLZo_638x960.jpg");
+        oks.setUrl(newsUrl);
+        oks.setComment(String.format("I have read \"%s\" [%s] on News Master!", newsTitle, newsUrl));
+        oks.setSite(getString(R.string.app_name));
+        oks.setSiteUrl(newsUrl);
+
+        oks.show(this);
     }
 
     class QuerySingleNewsFavoriteTask extends AsyncTask<Long, Void, FavoriteNews> {

@@ -1,5 +1,6 @@
 package com.ihandy.a2013010952.util;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
@@ -13,9 +14,9 @@ import com.android.volley.toolbox.Volley;
  */
 public class RequestSingleton {
     private static RequestSingleton instance;
+    private static Context mCtx;
     private RequestQueue requestQueue;
     private ImageLoader mImageLoader;
-    private static Context mCtx;
 
     private RequestSingleton(Context context) {
         mCtx = context;
@@ -23,7 +24,12 @@ public class RequestSingleton {
         mImageLoader = new ImageLoader(requestQueue,
                 new ImageLoader.ImageCache() {
                     private final LruCache<String, Bitmap>
-                            cache = new LruCache<String, Bitmap>(5 * 1024 * 1024);
+                            cache = new LruCache<String, Bitmap>(((ActivityManager) MyApplication.getAppContext().getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass() / 8 * 1024 * 1024) {
+                        @Override
+                        protected int sizeOf(String key, Bitmap value) {
+                            return value.getRowBytes() * value.getHeight();
+                        }
+                    };
 
                     @Override
                     public Bitmap getBitmap(String url) {

@@ -2,6 +2,7 @@ package com.ihandy.a2013010952.adapter;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ import java.util.List;
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
     private List<JSONObject> newsList = new ArrayList<>();
     private Context context;
+    private NewsUnit newsUnit = new NewsUnit();
 
     public NewsAdapter(Context context, JSONArray jsonArray) {
         this.context = context;
@@ -42,20 +44,13 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        try {
-            JSONObject news = newsList.get(position);
-            String title = news.getString("title");
-            JSONObject jsSource = news.getJSONObject("source");
-            String source = jsSource.getString("name");
-            final String newsUrl = jsSource.getString("url");
-            holder.rootView.setOnClickListener(new ItemOnClickListener(context, newsUrl, news));
-            String imgurl = news.getJSONArray("imgs").getJSONObject(0).getString("url");
-            holder.titleTextView.setText(title);
-            holder.sourceNameTextView.setText(source);
-            ImageLoader mImageLoader = RequestSingleton.getInstance(MyApplication.getAppContext()).getmImageLoader();
-            holder.networkImageView.setImageUrl(imgurl, mImageLoader);
-        } catch (org.json.JSONException e) {
-        }
+        JSONObject news = newsList.get(position);
+        jsonNewsParser(news, newsUnit);
+        holder.rootView.setOnClickListener(new ItemOnClickListener(context, newsUnit.newsUrl, news));
+        holder.titleTextView.setText(newsUnit.newsTitle);
+        holder.sourceNameTextView.setText(newsUnit.origin);
+        ImageLoader mImageLoader = RequestSingleton.getInstance(MyApplication.getAppContext()).getmImageLoader();
+        holder.networkImageView.setImageUrl(newsUnit.imgUrl, mImageLoader);
     }
 
     @Override
@@ -82,6 +77,29 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
         addNewsList(jsonArray);
     }
 
+    private void jsonNewsParser(JSONObject newsJson, NewsUnit newsUnit) {
+        try {
+            newsUnit.newsTitle = newsJson.getString("title");
+        } catch (org.json.JSONException e) {
+            newsUnit.newsTitle = null;
+        }
+        try {
+            newsUnit.origin = newsJson.getString("origin");
+        } catch (org.json.JSONException e) {
+            newsUnit.origin = null;
+        }
+        try {
+            newsUnit.newsUrl = newsJson.getJSONObject("source").getString("url");
+        } catch (org.json.JSONException e) {
+            newsUnit.newsUrl = null;
+        }
+        try {
+            newsUnit.imgUrl = newsJson.getJSONArray("imgs").getJSONObject(0).getString("url");
+        } catch (org.json.JSONException e) {
+            newsUnit.imgUrl = null;
+        }
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView titleTextView;
         public TextView sourceNameTextView;
@@ -97,5 +115,12 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
             networkImageView.setDefaultImageResId(R.drawable.loading);
             networkImageView.setErrorImageResId(R.drawable.no_image_available);
         }
+    }
+
+    private class NewsUnit {
+        public String newsTitle;
+        public String origin;
+        public String imgUrl;
+        public String newsUrl;
     }
 }

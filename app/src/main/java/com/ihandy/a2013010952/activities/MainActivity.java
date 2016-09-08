@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import com.ihandy.a2013010952.R;
 import com.ihandy.a2013010952.adapter.NewsFragmentPagerAdapter;
 import com.ihandy.a2013010952.database.model.FavoriteNews;
+import com.ihandy.a2013010952.database.model.VisitedNews;
 
 
 public class MainActivity extends AppCompatActivity
@@ -113,6 +114,9 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.nav_ctgmng:
                 this.startActivity(new Intent(this, CategoryManageActivity.class));
+                break;
+            case R.id.nav_history:
+                this.startActivity(new Intent(this, VisitedNewsActivity.class));
                 break;
             case R.id.nav_aboutme:
                 this.startActivity(new Intent(this, AboutMeActivity.class));

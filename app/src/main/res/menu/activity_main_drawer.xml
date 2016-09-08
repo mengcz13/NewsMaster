@@ -44,6 +44,11 @@
         android:title="@string/category_management" />
 
     <item
+        android:id="@+id/nav_history"
+        android:icon="@drawable/ic_alarm_black_24dp"
+        android:title="@string/history" />
+
+    <item
         android:id="@+id/nav_aboutme"
         android:icon="@drawable/ic_face_black_24dp"
         android:title="@string/aboutme" />

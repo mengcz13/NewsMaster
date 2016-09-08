@@ -33,6 +33,7 @@
     -->
     <list>
         <mapping class="com.ihandy.a2013010952.database.model.FavoriteNews"></mapping>
+        <mapping class="com.ihandy.a2013010952.database.model.VisitedNews"></mapping>
     </list>
 
     <!--

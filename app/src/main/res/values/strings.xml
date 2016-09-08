@@ -13,4 +13,6 @@
     <string name="favorites">Favorites</string>
     <string name="category_management">Category Management</string>
     <string name="aboutme">About Me</string>
+    <string name="title_activity_visited_news">VIsitedNewsActivity</string>
+    <string name="history">History</string>
 </resources>

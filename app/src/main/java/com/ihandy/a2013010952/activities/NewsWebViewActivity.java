@@ -21,6 +21,7 @@ import android.widget.ImageButton;
 
 import com.ihandy.a2013010952.R;
 import com.ihandy.a2013010952.database.model.FavoriteNews;
+import com.ihandy.a2013010952.database.model.VisitedNews;
 import com.ihandy.a2013010952.itemlistener.ItemOnClickListener;
 import com.ihandy.a2013010952.util.MyApplication;
 import com.ihandy.a2013010952.util.RequestSingleton;
@@ -51,7 +52,7 @@ public class NewsWebViewActivity extends AppCompatActivity {
     private JSONObject newsJson;
     private long newsId;
     private MenuItem shareMenuItem;
-    private OnekeyShare oks;
+    private OnekeyShare oks = new OnekeyShare();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,10 +89,18 @@ public class NewsWebViewActivity extends AppCompatActivity {
         });
 
         newsJsonStr = intent.getStringExtra(ItemOnClickListener.NEWSJSON);
+
+        ShareSDK.initSDK(this, "16ca960e7a1f5");
+
         try {
             newsJson = new JSONObject(newsJsonStr);
             newsId = newsJson.getLong("news_id");
             new PrepareForShareTask().execute(newsJson);
+            VisitedNews visitedNews = new VisitedNews();
+            visitedNews.setNewsId(newsId);
+            visitedNews.setJsonData(newsJsonStr);
+            visitedNews.setCollectTime(System.currentTimeMillis());
+            new AddNewsToHistoryTask().execute(visitedNews);
         } catch (org.json.JSONException e) {
         }
 
@@ -152,7 +161,10 @@ public class NewsWebViewActivity extends AppCompatActivity {
     }
 
     private void showShare() {
+        oks.disableSSOWhenAuthorize();
         oks.setTitle(newsTitle);
+        if (newsUrl == null)
+            newsUrl = "no url";
         oks.setTitleUrl(newsUrl);
         oks.setText(String.format("I have read \"%s\" [%s] on News Master!", newsTitle, newsUrl));
         if (titleImgPath != null)
@@ -167,10 +179,7 @@ public class NewsWebViewActivity extends AppCompatActivity {
 
         @Override
         protected Boolean doInBackground(JSONObject... jsonObjects) {
-            ShareSDK.initSDK(NewsWebViewActivity.this, "16ca960e7a1f5");
-            Boolean success;
-            oks = new OnekeyShare();
-            oks.disableSSOWhenAuthorize();
+            Boolean success = false;
             JSONObject newsJson = jsonObjects[0];
             try {
                 newsTitle = newsJson.getString("title");
@@ -268,6 +277,18 @@ public class NewsWebViewActivity extends AppCompatActivity {
             addedToFavorite = false;
             favoriteItem.setIcon(R.drawable.ic_favorite_border_white_24dp);
             favoriteItem.setEnabled(true);
+        }
+    }
+
+    class AddNewsToHistoryTask extends AsyncTask<VisitedNews, Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(VisitedNews... visitedNewses) {
+            VisitedNews v0 = visitedNewses[0];
+            String newsIdstr = Long.toString(v0.getNewsId());
+            VisitedNews res = DataSupport.where("newsid = ?", newsIdstr).findFirst(VisitedNews.class);
+            if (res != null)
+                res.delete();
+            return v0.save();
         }
     }
 }

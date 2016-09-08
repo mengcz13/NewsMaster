@@ -39,17 +39,16 @@
             android:name=".activities.CategoryManageActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".activities.FavoritesActivity" />
-        <activity android:name=".activities.AboutMeActivity"></activity>
-
+        <activity android:name=".activities.AboutMeActivity" />
         <activity
             android:name="com.mob.tools.MobUIShell"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
             android:windowSoftInputMode="stateHidden|adjustResize">
-
             <intent-filter>
                 <data android:scheme="tencent100371282" />
+
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -59,20 +58,23 @@
             <!-- 调用新浪原生SDK，需要注册的回调activity -->
             <intent-filter>
                 <action android:name="com.sina.weibo.sdk.action.ACTION_SDK_REQ_ACTIVITY" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
-            <!--微信分享回调 -->
-            <!--<activity-->
-            <!--android:name=".wxapi.WXEntryActivity"-->
-            <!--android:configChanges="keyboardHidden|orientation|screenSize"-->
-            <!--android:exported="true"-->
-            <!--android:screenOrientation="portrait"-->
-            <!--android:theme="@android:style/Theme.Translucent.NoTitleBar" />-->
+            <!-- 微信分享回调 -->
+            <!-- <activity -->
+            <!-- android:name=".wxapi.WXEntryActivity" -->
+            <!-- android:configChanges="keyboardHidden|orientation|screenSize" -->
+            <!-- android:exported="true" -->
+            <!-- android:screenOrientation="portrait" -->
+            <!-- android:theme="@android:style/Theme.Translucent.NoTitleBar" /> -->
 
         </activity>
-
-
+        <activity
+            android:name=".activities.VisitedNewsActivity"
+            android:label="@string/title_activity_visited_news"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

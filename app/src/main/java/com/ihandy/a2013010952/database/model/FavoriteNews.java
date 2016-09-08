@@ -6,9 +6,9 @@ import org.litepal.crud.DataSupport;
  * Created by Mengcz on 2016/9/3.
  */
 public class FavoriteNews extends DataSupport {
-    private long newsId;
-    private long collectTime;
-    private String jsonData;
+    protected long newsId;
+    protected long collectTime;
+    protected String jsonData;
 
     public long getNewsId() {
         return newsId;

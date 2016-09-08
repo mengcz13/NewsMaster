@@ -3,15 +3,11 @@ package com.ihandy.a2013010952.activities;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.ihandy.a2013010952.R;
-import com.ihandy.a2013010952.adapter.CategoryAdapter;
 import com.ihandy.a2013010952.adapter.FavoriteFragmentPagerAdapter;
-import com.ihandy.a2013010952.fragment.FavoritesNewsFragment;
 
 public class FavoritesActivity extends AppCompatActivity {
 

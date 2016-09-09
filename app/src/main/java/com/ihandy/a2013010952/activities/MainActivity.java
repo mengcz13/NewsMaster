@@ -4,27 +4,27 @@ package com.ihandy.a2013010952.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
-import android.support.v4.view.ViewPager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.github.florent37.materialviewpager.MaterialViewPager;
+import com.github.florent37.materialviewpager.header.HeaderDesign;
 import com.ihandy.a2013010952.R;
 import com.ihandy.a2013010952.adapter.NewsFragmentPagerAdapter;
-import com.ihandy.a2013010952.database.model.FavoriteNews;
-import com.ihandy.a2013010952.database.model.VisitedNews;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     public static boolean categoryChanged = false;
-    private ViewPager mViewPager;
+    private MaterialViewPager mViewPager;
     private NewsFragmentPagerAdapter newsFragmentStatePagerAdapter;
     private TabLayout tabLayout;
 
@@ -33,17 +33,73 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle(getResources().getText(R.string.app_name));
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
+//        getSupportActionBar().setTitle(getResources().getText(R.string.app_name));
 
         newsFragmentStatePagerAdapter = new NewsFragmentPagerAdapter(
                 getSupportFragmentManager(), this
         );
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(newsFragmentStatePagerAdapter);
-        tabLayout = (TabLayout) findViewById(R.id.tab);
-        tabLayout.setupWithViewPager(mViewPager);
+        mViewPager = (MaterialViewPager) findViewById(R.id.pager);
+
+        Toolbar toolbar = mViewPager.getToolbar();
+        if (toolbar != null) {
+            setSupportActionBar(toolbar);
+
+            ActionBar actionBar = getSupportActionBar();
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+            actionBar.setDisplayShowTitleEnabled(true);
+            actionBar.setDisplayUseLogoEnabled(false);
+            actionBar.setHomeButtonEnabled(true);
+            actionBar.setTitle(" ");
+        }
+
+        mViewPager.getViewPager().setAdapter(newsFragmentStatePagerAdapter);
+        mViewPager.getPagerTitleStrip().setViewPager(mViewPager.getViewPager());
+//        tabLayout = (TabLayout) findViewById(R.id.tab);
+//        tabLayout.setupWithViewPager(mViewPager);
+
+        mViewPager.setMaterialViewPagerListener(new MaterialViewPager.Listener() {
+            @Override
+            public HeaderDesign getHeaderDesign(int page) {
+                switch (page % 4) {
+//                    case 0:
+//                        return HeaderDesign.fromColorResAndDrawable(
+//                                R.color.green,
+//                                getResources().getDrawable(R.drawable.greenbgimg));
+//                    case 0:
+//                        return HeaderDesign.fromColorResAndDrawable(
+//                                R.color.blue,
+//                                getResources().getDrawable(R.drawable.bluebgimg));
+//                    case 1:
+//                        return HeaderDesign.fromColorResAndDrawable(
+//                                R.color.cyan,
+//                                getResources().getDrawable(R.drawable.cyanbgimg));
+//                    case 2:
+//                        return HeaderDesign.fromColorResAndDrawable(
+//                                R.color.red,
+//                                getResources().getDrawable(R.drawable.redbgimg));
+                    case 0:
+                        return HeaderDesign.fromColorResAndUrl(
+                                R.color.blue,
+                                "http://cdn1.tnwcdn.com/wp-content/blogs.dir/1/files/2014/06/wallpaper_51.jpg");
+                    case 1:
+                        return HeaderDesign.fromColorResAndUrl(
+                                R.color.green,
+                                "https://fs01.androidpit.info/a/63/0e/android-l-wallpapers-630ea6-h900.jpg");
+                    case 2:
+                        return HeaderDesign.fromColorResAndUrl(
+                                R.color.cyan,
+                                "http://www.droid-life.com/wp-content/uploads/2014/10/lollipop-wallpapers10.jpg");
+                    case 3:
+                        return HeaderDesign.fromColorResAndUrl(
+                                R.color.red,
+                                "http://www.tothemobile.com/wp-content/uploads/2014/07/original.jpg");
+                }
+                return null;
+            }
+        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -64,8 +120,10 @@ public class MainActivity extends AppCompatActivity
             newsFragmentStatePagerAdapter = new NewsFragmentPagerAdapter(
                     getSupportFragmentManager(), this
             );
-            mViewPager.setAdapter(newsFragmentStatePagerAdapter);
-            tabLayout.setupWithViewPager(mViewPager);
+//            mViewPager.setAdapter(newsFragmentStatePagerAdapter);
+//            tabLayout.setupWithViewPager(mViewPager);
+            mViewPager.getViewPager().setAdapter(newsFragmentStatePagerAdapter);
+            mViewPager.getPagerTitleStrip().setViewPager(mViewPager.getViewPager());
             categoryChanged = false;
         }
     }

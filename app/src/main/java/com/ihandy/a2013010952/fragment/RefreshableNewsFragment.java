@@ -1,7 +1,9 @@
 package com.ihandy.a2013010952.fragment;
 
+import android.app.DownloadManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -55,16 +57,23 @@ public class RefreshableNewsFragment extends NewsFragment {
         JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, refreshResponseListener, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-//                String jsonstr = (new String(RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().getCache().get(url).data));
-//                try {
-//                    JSONObject cachedjson = new JSONObject(jsonstr);
-//                    refreshResponseListener.onResponse(cachedjson);
-//                } catch (org.json.JSONException e) {
-//                }
             }
         });
         jsObjRequest.setShouldCache(true);
         RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().add(jsObjRequest);
+        JsonObjectRequest testRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Snackbar.make(mSwipeRefreshLayout, "Refreshed!", Snackbar.LENGTH_SHORT).show();
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Snackbar.make(mSwipeRefreshLayout, "Network Error.", Snackbar.LENGTH_SHORT).show();
+            }
+        });
+        testRequest.setShouldCache(false);
+        RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().add(testRequest);
     }
 
     @Override
@@ -73,12 +82,6 @@ public class RefreshableNewsFragment extends NewsFragment {
         JsonObjectRequest jsObjRequest = new JsonObjectRequest(Request.Method.GET, url, null, loadMoreResponseListener, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-//                String jsonstr = (new String(RequestSingleton.getInstance(MyApplication.getAppContext()).getRequestQueue().getCache().get(url).data));
-//                try {
-//                    JSONObject cachedjson = new JSONObject(jsonstr);
-//                    loadMoreResponseListener.onResponse(cachedjson);
-//                } catch (org.json.JSONException e) {
-//                }
             }
         });
         jsObjRequest.setShouldCache(true);

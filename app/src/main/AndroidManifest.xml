@@ -25,6 +25,7 @@
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/icon_name"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,12 +35,18 @@
         </activity>
         <activity
             android:name=".activities.NewsWebViewActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".activities.CategoryManageActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".activities.FavoritesActivity" />
-        <activity android:name=".activities.AboutMeActivity" />
+        <activity
+            android:name=".activities.FavoritesActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".activities.AboutMeActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name="com.mob.tools.MobUIShell"
             android:configChanges="keyboardHidden|orientation|screenSize"
@@ -74,6 +81,7 @@
         <activity
             android:name=".activities.VisitedNewsActivity"
             android:label="@string/title_activity_visited_news"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

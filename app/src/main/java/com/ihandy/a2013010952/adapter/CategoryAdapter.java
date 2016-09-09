@@ -30,13 +30,14 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     public CategoryAdapter() {
         super();
         List<CatTitlePair> allColumns = LikedColumnsSingleton.getInstance(MyApplication.getAppContext()).getAllColumns();
-        Log.d("size", "size " + allColumns.size());
-        for (CatTitlePair pair : allColumns) {
-            catMap.put(pair.category, pair);
-            if (pair.status == CatTitlePair.LIKE)
-                likeList.add(pair);
-            else if (pair.status == CatTitlePair.DISLIKE)
-                dislikeList.add(pair);
+        if (allColumns != null) {
+            for (CatTitlePair pair : allColumns) {
+                catMap.put(pair.category, pair);
+                if (pair.status == CatTitlePair.LIKE)
+                    likeList.add(pair);
+                else if (pair.status == CatTitlePair.DISLIKE)
+                    dislikeList.add(pair);
+            }
         }
         notifyDataSetChanged();
     }

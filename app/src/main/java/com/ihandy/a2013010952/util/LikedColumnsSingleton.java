@@ -90,9 +90,11 @@ public class LikedColumnsSingleton {
         List<CatTitlePair> neededList = new ArrayList<>();
         List<CatTitlePair> columns = GSON.fromJson(jsonstr, new TypeToken<List<CatTitlePair>>() {
         }.getType());
-        for (CatTitlePair pair : columns) {
-            if (pair.status == CatTitlePair.LIKE) {
-                neededList.add(pair);
+        if (columns != null) {
+            for (CatTitlePair pair : columns) {
+                if (pair.status == CatTitlePair.LIKE) {
+                    neededList.add(pair);
+                }
             }
         }
         return neededList;
@@ -103,9 +105,11 @@ public class LikedColumnsSingleton {
         List<CatTitlePair> neededList = new ArrayList<>();
         List<CatTitlePair> columns = GSON.fromJson(jsonstr, new TypeToken<List<CatTitlePair>>() {
         }.getType());
-        for (CatTitlePair pair : columns) {
-            if (pair.status == CatTitlePair.DISLIKE) {
-                neededList.add(pair);
+        if (columns != null) {
+            for (CatTitlePair pair : columns) {
+                if (pair.status == CatTitlePair.DISLIKE) {
+                    neededList.add(pair);
+                }
             }
         }
         return neededList;
